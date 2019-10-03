@@ -1,0 +1,98 @@
+---
+- hosts: ubuntu
+  become: yes
+  become_method: sudo
+  tasks:
+  - name: installing java 8 on ubuntu
+    command: "{{ item }}"
+    with_items:
+      - sudo apt-get install default-jdk -y  
+      - sudo apt-get install wget -y
+      - sudo apt-get install python-software-properties -y
+
+  - name: Ensure group "tomcat" exists
+    group:
+      name: tomcat
+      state: present
+    become: yes
+  - name: Add the user 'tomcat' with a  primary group of 'tomcat'
+    user:
+      name: tomcat
+      comment: tomcat user
+      group: tomcat
+    become: yes
+  - file:
+      path: /opt/tomcat
+      mode: 0755
+      state: directory 
+    become: yes
+    #when: ansible_os_family == "Debian"
+  - name: installing tomcat tar file
+    unarchive:
+      src: http://archive.apache.org/dist/tomcat/tomcat-9/v9.0.1/bin/apache-tomcat-9.0.1.tar.gz
+      dest: /opt/tomcat
+      mode: 0755
+      remote_src: yes
+    become: yes
+  - name: create a link
+    command: ln -s /opt/tomcat/apache-tomcat-9* /opt/tomcat/latest
+    args:
+      chdir: /opt/tomcat
+    become: yes
+    ignore_errors: yes
+  - name: change mode
+    command: chmod +x bin/
+    args:
+      chdir: /opt/tomcat/apache-tomcat-9.0.1
+    become: yes
+  - name: change own
+    command: chown -RH tomcat:tomcat apache-tomcat-9.0.1 
+    args:
+      chdir: /opt/tomcat/
+    become: yes 
+  - template:
+      src: /etc/ansible/workspace/java-app/templates/tomcat.service
+      dest: /etc/systemd/system/tomcat.service
+      mode: 0755
+    become: yes
+
+  - name: system daemon reload
+    command: systemctl daemon-reload
+    become: yes
+    ignore_errors: yes
+
+  - template:
+      src: /etc/ansible/workspace/java-app/templates/tomcat-users.xml 
+      dest: /opt/tomcat/apache-tomcat-9.0.1/conf/tomcat-users.xml
+      mode: 0755
+    become: yes
+  - template:
+      src: /etc/ansible/workspace/java-app/templates/context.xml
+      dest: /opt/tomcat/apache-tomcat-9.0.1/webapps/manager/META-INF/context.xml
+      mode: 0755
+    become: yes
+
+  - name: chmod
+    command: chmod 755 bin/
+    args:
+      chdir: /opt/tomcat/apache-tomcat-9.0.1 
+    become: yes 
+
+  - file:
+      path: /opt/tomcat/apache-tomcat-9.0.1/bin
+      mode: 0755
+      state: directory
+    become: yes
+
+  - name: start tomcat
+    command: bash -lc "cd /opt/tomcat/apache-tomcat-9.0.1/bin/ && sh startup.sh"
+    #command: bash -lc "/opt/tomcat/apache-tomcat-9.0.1/bin/startup.sh"
+    become: yes
+
+  - name: Download war file from artifactory
+    get_url:
+       #url: "http://192.168.2.5:8081/artifactory/Ansible-Java-Sourcecode-POC/newapp-0.0.1-SNAPSHOT.war"
+       url: "http://192.168.2.5:8081/artifactory/Bamboo-Ansible-java/newapp-0.0.1-SNAPSHOT.war"
+       dest: "/opt/tomcat/apache-tomcat-9.0.1/webapps"
+    become: yes
+    #when: ansible_facts['os_family'] == 'Debian'

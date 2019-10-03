@@ -1,0 +1,20 @@
+- hosts: ubuntu
+  
+  tasks:
+    - name: copy user files
+      become: yes
+      template:
+        src: '/etc/ansible/workspace/java-app/tomcat-users.xml'
+        dest: '/opt/tomcat/conf/'
+        owner: 'tomcat'
+        group: 'tomcat'
+        mode: '0755'
+      when: ansible_facts['os_family'] == 'Debian'
+    #- name: copy user file    
+      #when: ansible_facts['os_family'] == "Windows"
+      #win_copy:
+        #src: '/etc/ansible/workspace/java-app/tomcat-users.xml'
+        #dest: 'C:\Program Files\Apache Software Foundation\tomcat\apache-tomcat-8.5.12\conf\tomcat-users.xml'  
+      #win_copy:
+        #src: '/etc/ansible/workspace/java-app/templates/context.xml'
+        #dest: 'C:\Program Files\Apache Software Foundation\tomcat\apache-tomcat-8.5.12\webapss\manager\META-INF\context.xml'

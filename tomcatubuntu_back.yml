@@ -1,0 +1,30 @@
+---
+# This playbook deploys a simple standalone Tomcat 9 server with nginx revrese proxy.
+
+- hosts: ubuntu
+  become: yes
+  become_method: sudo  
+
+
+  roles:
+     - tomcat
+  tasks:
+  - name: copy user files
+    become: yes
+    template:
+      src: '/etc/ansible/workspace/java-app/tomcat-users.xml'
+      dest: '/opt/tomcat/conf/'
+      owner: 'tomcat'
+      group: 'tomcat'
+      mode: '0755'
+  - name: start tomcat
+    command: ./startup.sh
+    args:
+      chdir: /opt/tomcat/bin
+  - name: Download war file from artifactory
+    become: yes
+    get_url:
+      url: "http://192.168.1.130:8081/artifactory/Ansible-Java-Sourcecode-POC/newapp-0.0.1-SNAPSHOT.war"
+      dest: "/opt/tomcat/webapps/"
+    #when: ansible_facts['os_family'] == 'Debian'
+
