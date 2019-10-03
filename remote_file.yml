@@ -11,8 +11,8 @@
     - name: Download war file from artifactory
       become: yes
       get_url:
-        url: "http://192.168.1.130:8081/artifactory/Ansible-Java-Sourcecode-POC/newapp-0.0.1-SNAPSHOT.war"
-        dest: "/opt/apache-tomcat-8.5.23/webapps"
+        url: "http://192.168.2.5:8081/artifactory/Bamboo-Ansible-java/newapp-0.0.1-SNAPSHOT.war"
+        dest: "/opt/"
       when: ansible_facts['os_family'] == 'RedHat'
     - name: Download war file from artifactory
       win_get_url:
