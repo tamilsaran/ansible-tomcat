@@ -1,12 +1,15 @@
-- hosts: all
-  become_user: root
-  become: yes
+---
+- hosts: centos
+  become: True
 
-  tasks:
-    - name: Download war file
-      copy:
-        src: /var/tmp/newapp-0.0.1-SNAPSHOT.war
-        dest: /home/weblogic/newapp-0.0.1-SNAPSHOT.war
+  vars:
+    tomcat_version: 8.5.23
 
-    - name: Execute app
-      command:  java -cp /opt/weblogic/wlserver/server/lib/weblogic.jar weblogic.Deployer -adminurl t3://ansiblecentos.zippyops.com:7001 -username weblogic -password welcome0 -deploy -name zippyops1 -targets AdminServer -source /home/weblogic/newapp-0.0.1-SNAPSHOT.war
+    tomcat_permissions_production: True
+
+    tomcat_users:
+      - username: "tomcat-user"
+        password: "zippyops"
+        roles: " tomcat,admin,manager,manager-gui"
+  roles:
+    - role: zaxos.tomcat-ansible-role
