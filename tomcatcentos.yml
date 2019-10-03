@@ -1,7 +1,5 @@
 ---
-- hosts: 192.168.1.14
-  become_method:sudo
-  become: yes
+- hosts: all
 
   vars:
     tomcat_version: 8.5.23
