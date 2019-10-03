@@ -1,0 +1,58 @@
+---
+- hosts: windows
+  gather_facts: no
+  tasks:
+  - win_chocolatey:
+       name: chocolatey
+       state: latest  
+
+#  - win_command: powershell.exe choco install tomcat --version 8.5.12 --force -y
+#    args:
+#      chdir: C:\Users\demo
+  - win_command: powershell.exe choco install jdk8 -y
+    args:
+      chdir: C:\Users\demo
+
+  - win_command: powershell.exe choco install tomcat -y
+    args:
+      chdir: C:\Users\demo
+  
+  - template:
+      src: templates/tomcat-users.xml
+      dest: C:\ProgramData\Tomcat9\conf\tomcat-users.xml
+      mode: 0644
+  - template:
+      src: templates/context.xml
+      dest: C:\ProgramData\Tomcat9\webapps\manager\META-INF\context.xml
+      mode: 0644
+#  - name: Restart Apache
+#    win_command: net start Tomcat9
+#    args:
+#      chdir: C:\ProgramData\chocolatey\lib\Tomcat\tools\apache-tomcat-9.0.20\bin
+#    #when: ansible_os_family == "Windows"
+
+  - name: Download war file from artifactory
+    win_get_url:
+      #url: 'http://192.168.2.5:8081/artifactory/Ansible-Java-Sourcecode-POC/newapp-0.0.1-SNAPSHOT.war'
+      url: 'http://192.168.2.5:8081/artifactory/Bamboo-Ansible-java/newapp-0.0.1-SNAPSHOT.war'
+      dest: 'C:\ProgramData\Tomcat9\webapps\newapp-0.0.1-SNAPSHOT.war'
+    #when: ansible_os_family == 'Windows'
+  - name: Restart Apache
+    win_command: net start Tomcat9
+    args:
+      #chdir: C:\ProgramData\chocolatey\lib\Tomcat\tools\apache-tomcat-9.0.21\bin
+      chdir:  C:\ProgramData\chocolatey\bin
+    #when: ansible_os_family == "Windows"
+
+
+
+
+
+  #vars:
+    #tomcat_permissions_production: True
+
+    #tomcat_users:
+      #- username: "tomcat"
+        #password: "zippyops"
+        #roles: " tomcat,admin,manager,manager-gui"
+

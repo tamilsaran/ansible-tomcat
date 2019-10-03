@@ -1,0 +1,21 @@
+- hosts: all
+
+  tasks:
+    - name: Download war file from artifactory
+      become: yes
+      get_url:
+        url: "http://192.168.1.130:8081/artifactory/Ansible-Java-Sourcecode-POC/newapp-0.0.1-SNAPSHOT.war"
+        dest: "/opt/tomcat/webapps/"
+      when: ansible_facts['os_family'] == 'Debian'
+  
+    - name: Download war file from artifactory
+      become: yes
+      get_url:
+        url: "http://192.168.1.130:8081/artifactory/Ansible-Java-Sourcecode-POC/newapp-0.0.1-SNAPSHOT.war"
+        dest: "/opt/apache-tomcat-8.5.23/webapps"
+      when: ansible_facts['os_family'] == 'RedHat'
+    - name: Download war file from artifactory
+      win_get_url:
+        url: 'http://192.168.1.130:8081/artifactory/Ansible-Java-Sourcecode-POC/newapp-0.0.1-SNAPSHOT.war'
+        dest: 'C:\Program Files\Apache Software Foundation\tomcat\apache-tomcat-8.5.12\webapps\newapp-0.0.1-SNAPSHOT.war'
+      when: ansible_facts['os_family'] == 'Windows'
