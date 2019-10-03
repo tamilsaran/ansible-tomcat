@@ -1,22 +1,12 @@
 - hosts: all
+  become_user: root
+  become: yes
 
-  vars:
-    tomcat_version: 8.5.23
-
-    tomcat_permissions_production: True
-
-    tomcat_users:
-      - username: "tomcat-user"
-        password: "zippyops"
-        roles: " tomcat,admin,manager,manager-gui"
-  roles:
-    - role: zaxos.tomcat-ansible-role
   tasks:
-  - name: Download war file from artifactory
-    become: yes
-    get_url:
-      url: "http://192.168.2.5:8081/artifactory/Ansible-Java-Sourcecode-POC/newapp-0.0.1-SNAPSHOT.war"
-      #url: "http://192.168.2.5:8081/artifactory/Bamboo-Ansible-java/newapp-0.0.1-SNAPSHOT.war"
-      dest: "/opt/apache-tomcat-8.5.23/webapps"
-    #when: ansible_facts['os_family'] == 'RedHat'
+    - name: Download war file
+      copy:
+        src: /var/tmp/newapp-0.0.1-SNAPSHOT.war
+        dest: /home/weblogic/newapp-0.0.1-SNAPSHOT.war
 
+    - name: Execute app
+      command:  java -cp /opt/weblogic/wlserver/server/lib/weblogic.jar weblogic.Deployer -adminurl t3://ansiblecentos.zippyops.com:7001 -username weblogic -password welcome0 -deploy -name zippyops1 -targets AdminServer -source /home/weblogic/newapp-0.0.1-SNAPSHOT.war
