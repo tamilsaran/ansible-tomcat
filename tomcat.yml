@@ -13,3 +13,5 @@
         roles: " tomcat,admin,manager,manager-gui"
   roles:
     - role: zaxos.tomcat-ansible-role
+    
+    
